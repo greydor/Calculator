@@ -22,10 +22,17 @@ body{
     background-color: #f8f9fa;    
 }
 
-#display {
+#display-answer {
     color: #f8f9fa;
     font-size: 32px;
     margin: 5px 5px 0 auto;
+}
+
+#display-equation {
+    color: #b4b5b6;
+    font-size: 20px;
+    margin: 5px 5px 0 auto;
+    height: 20px;
 }
 
 #calculator {

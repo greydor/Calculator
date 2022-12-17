@@ -3,6 +3,7 @@ let num = 0;
 let oldNum = 0;
 let operator = ""
 let startFlag = true;
+let equation = ""
 
 let digits = document.querySelectorAll(".digit");
 digits.forEach(button => {
@@ -20,7 +21,9 @@ operators.forEach(button => {
     })
 })
 
-let display = document.querySelector("#display");
+let displayAnswer = document.querySelector("#display-answer");
+let displayEquation = document.querySelector("#display-equation");
+
 let equalsButton = document.querySelector("#equals");
 equalsButton.addEventListener("click", () => {
     if (!operator) {
@@ -31,13 +34,13 @@ equalsButton.addEventListener("click", () => {
     }
     else if (startFlag === true) {
         currentValue = window[operator](oldNum, num);
-        startFlag = false;
     }
     else {
         currentValue = window[operator](currentValue, num);        
     }
+    startFlag = false;
     console.log(currentValue);
-    display.textContent = currentValue;
+    displayAnswer.textContent = currentValue;
     operator = ""
 })
 
@@ -46,7 +49,8 @@ clear.addEventListener("click", () => {
     operator = "";
     currentValue = 0;
     num = 0;
-    display.textContent = 0;
+    displayEquation.textContent = "";
+    displayAnswer.textContent = 0;
     startFlag = true;
 })
 
