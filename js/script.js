@@ -3,26 +3,69 @@ let num = 0;
 let oldNum = 0;
 let operator = ""
 let startFlag = true;
-let equation = ""
+let equation = "";
+let lastButton = "";
+let operatorInEquation = false;
+let displayAnswer = document.querySelector("#display-answer");
+let displayEquation = document.querySelector("#display-equation");
+let text = displayEquation.textContent;
 
 let digits = document.querySelectorAll(".digit");
 digits.forEach(button => {
     button.addEventListener("click", () => {
-        oldNum = num;
-        num = +button.id;
-        console.log(num);
+        // Automatically clear values when a new expression is entered.
+        if (lastButton === "equals") {
+            clearHelper();
+            startFlag = true;
+            currentValue = 0;
+        }
+        if (num == 0) {
+            // If the first digit is zero, do nothing. 
+            if (button.id !== "0") {
+                num = button.id;      
+            }
+            else {
+                return;
+            }
+        }
+        else {
+            num += button.id
+        }
+
+        if (lastButton === "digit") {
+            displayEquation.textContent += `${button.id}`;
+        }
+        else {
+            displayEquation.textContent += ` ${num}`;
+        }
+        lastButton = "digit"
     })
 })
 
 let operators = document.querySelectorAll(".operator");
 operators.forEach(button => {
     button.addEventListener("click", () => {
+        
+        if (!operator) {
+            oldNum = num;
+            num = 0;
+        }
+        let operatorSymbol = button.textContent
+        if (operatorInEquation === true && lastButton !== "operator") {
+            return;
+        }
+        if (lastButton === "digit" || lastButton === "equals") {
+            displayEquation.textContent += ` ${operatorSymbol} `;
+        }
+        else if (lastButton === "operator") {
+            displayEquation.textContent = displayEquation.textContent.slice(0, -2);
+            displayEquation.textContent += ` ${operatorSymbol} `;
+        }
         operator = button.id
+        lastButton = "operator"
+        operatorInEquation = true;
     })
 })
-
-let displayAnswer = document.querySelector("#display-answer");
-let displayEquation = document.querySelector("#display-equation");
 
 let equalsButton = document.querySelector("#equals");
 equalsButton.addEventListener("click", () => {
@@ -33,31 +76,58 @@ equalsButton.addEventListener("click", () => {
         currentValue = "Cannot divide by zero"
     }
     else if (startFlag === true) {
-        currentValue = window[operator](oldNum, num);
+        currentValue = window[operator](+oldNum, +num);
     }
     else {
-        currentValue = window[operator](currentValue, num);        
+        currentValue = window[operator](+currentValue, +num);        
     }
     startFlag = false;
     console.log(currentValue);
     displayAnswer.textContent = currentValue;
-    operator = ""
+    lastButton = "equals"
+    clearHelper ();
 })
 
 let clear = document.querySelector("#clear");
 clear.addEventListener("click", () => {
-    operator = "";
-    currentValue = 0;
-    num = 0;
-    displayEquation.textContent = "";
-    displayAnswer.textContent = 0;
+    clearHelper();
     startFlag = true;
+    displayAnswer.textContent = "0";
+    currentValue = 0;
+    lastButton = ""
 })
 
-let sign = document.quesrySelector("#sign");
+let sign = document.querySelector("#sign");
 sign.addEventListener("click", () => {
     num = num * -1;
 })
+
+let del = document.querySelector("#delete");
+del.addEventListener("click", () => {
+    let x = displayEquation.textContent;
+    if (lastButton === "digit") {
+        displayEquation.textContent = displayEquation.textContent.slice(0, -1);
+        num = +(num.toString().slice(0, -1));
+        lastButton = getLastButton();
+    }
+    else if (lastButton === "operator") {
+        lastButton = "digit"
+        displayEquation.textContent = displayEquation.textContent.slice(0, -4);
+        operator = "";
+    }
+})
+
+function getLastButton() {
+    if (!displayEquation.textContent) {
+        return "";
+    }
+    else if (displayEquation.textContent.slice(-1) === " ") {
+        return "operator";
+    }
+    else {
+        return "digit";
+    }
+}
 
 function add(x, y) {
     return x + y;
@@ -77,4 +147,12 @@ function divide(x, y) {
 
 function operate(x, y, operator) {
     return operator(x, y);
+}
+
+function clearHelper () {
+    operator = "";
+    num = 0;
+    displayEquation.textContent = "";
+    operatorInEquation = false;
+    oldNum = 0;
 }
