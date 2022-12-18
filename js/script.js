@@ -1,54 +1,32 @@
+// Answer that gets displayed
 let currentValue = 0;
-let num = 0;
-let oldNum = 0;
+// The latest number entered.
+let num = "";
+// The previous number entered.
+let oldNum = "";
 let operator = "";
 let startFlag = true;
 let equation = "";
 let lastButton = "";
 let operatorInEquation = false;
+let decimalFlag = false;
+
 let displayAnswer = document.querySelector("#display-answer");
 let displayEquation = document.querySelector("#display-equation");
-let decimalFlag = false;
-let zeroesAfterDecimal = "";
 
 let digits = document.querySelectorAll(".digit");
 digits.forEach((button) => {
   button.addEventListener("click", () => {
-    // Automatically clear values when a new expression is entered.
+    // Automatically clear values when a new expression is started.
     if (lastButton === "equals") {
-      clearHelper();
-      startFlag = true;
-      currentValue = 0;
+      fullClear();
     }
-    if (button.id !== "0" && lastButton === "decimal") {
-      num = +(num.toString() + "." + zeroesAfterDecimal + button.id);
-      zeroesAfterDecimal = ""
-    } 
-    else if (num == 0) {
-      // If the first digit is zero, do nothing.
-      if (button.id !== "0" && lastButton !== "decimal") {
-        num = button.id;
-      } else if (button.id === "0" && lastButton === "decimal") {
-        
-      }
-      
-      else {
-        return;
-      }
-    } 
-    else if (lastButton !== "decimal"){
-      num += button.id;
+    // If the first digit is zero, do nothing.
+    if (button.id === "0" && num === "") {
+      return;
     }
-
-    if (lastButton === "digit" || lastButton === "decimal") {
-      displayEquation.textContent += `${button.id}`;
-    } else {
-      displayEquation.textContent += ` ${num}`;
-    }
-    if (lastButton === "decimal" && button.id === "0") {
-      zeroesAfterDecimal = zeroesAfterDecimal + "0";
-      return
-    }
+    num += button.id;
+    displayEquation.textContent += button.id;
     lastButton = "digit";
   });
 });
@@ -60,67 +38,71 @@ operators.forEach((button) => {
     if (!displayEquation.textContent && startFlag === true) {
       return;
     }
+    // Prevent adding a second operator.
+    if (operatorInEquation === true && lastButton !== "operator") {
+      return;
+    }
     // Show previously calculated value when continuing the calculation.
     if (!displayEquation.textContent && startFlag === false) {
       displayEquation.textContent = currentValue;
     }
-    // Reset and save current value of num when an operator is chosen for the first
-    // time.
-    if (!operator) {
+    // Reset and save current value of num when an operator is chosen for the first time.
+    if (!operatorInEquation) {
       oldNum = num;
-      num = 0;
+      num = "";
     }
+
     let operatorSymbol = button.textContent;
-    if (operatorInEquation === true && lastButton !== "operator") {
-      return;
-    }
+    // Add trailing zero to decimal.
     if (lastButton === "decimal") {
       displayEquation.textContent += `0 ${operatorSymbol} `;
-    }
-    if (lastButton === "digit" || lastButton === "equals") {
+    } else if (lastButton === "digit" || lastButton === "equals") {
       displayEquation.textContent += ` ${operatorSymbol} `;
-    } else if (lastButton === "operator") {
+    }
+    // Replace last entered operator.
+    else if (lastButton === "operator") {
       displayEquation.textContent = displayEquation.textContent.slice(0, -2);
       displayEquation.textContent += ` ${operatorSymbol} `;
     }
     operator = button.id;
-    lastButton = "operator";
     operatorInEquation = true;
+    lastButton = "operator";
     decimalFlag = false;
   });
 });
 
 let equalsButton = document.querySelector("#equals");
 equalsButton.addEventListener("click", () => {
-  if (!operator) {
+  if (!operatorInEquation) {
     return;
   }
-  if (operator === "divide" && num === 0) {
+  if (operator === "divide" && num === "0") {
     currentValue = "Cannot divide by zero";
-  } else if (startFlag === true) {
+  }
+  // Check if equation is a continuation of a previously calculated value.
+  // Calculate value to display.
+  else if (startFlag === true) {
     currentValue = window[operator](+oldNum, +num);
   } else {
     currentValue = window[operator](+currentValue, +num);
   }
   startFlag = false;
-  console.log(currentValue);
   displayAnswer.textContent = currentValue;
   lastButton = "equals";
-  clearHelper();
+  partialClear();
 });
 
 let clear = document.querySelector("#clear");
 clear.addEventListener("click", () => {
-  clearHelper();
-  startFlag = true;
+  fullClear();
   displayAnswer.textContent = "0";
-  currentValue = 0;
   lastButton = "";
 });
 
 let sign = document.querySelector("#sign");
 sign.addEventListener("click", () => {
-  num = num * -1;
+  num = (+num * -1).toString();
+
   let splitEquation = displayEquation.textContent.split(" ");
   let lastValue = +splitEquation.pop();
   if (lastValue == 0) {
@@ -140,41 +122,33 @@ sign.addEventListener("click", () => {
 let decimal = document.querySelector("#decimal");
 decimal.addEventListener("click", () => {
   if (lastButton === "equals") {
-    clearHelper();
-    startFlag = true;
-    currentValue = 0;
+    fullClear();
   }
-  if (decimalFlag === true) {
+  // Do not allow multiple decimals.
+  else if (decimalFlag === true) {
     return;
   }
-  displayEquation.textContent += "."
+  displayEquation.textContent += ".";
+  num += ".";
   decimalFlag = true;
-  lastButton = "decimal"
-})
+  lastButton = "decimal";
+});
 
 let del = document.querySelector("#delete");
 del.addEventListener("click", () => {
-  let x = displayEquation.textContent;
   if (lastButton === "digit") {
     displayEquation.textContent = displayEquation.textContent.slice(0, -1);
-    if (zeroesAfterDecimal === "") {
-          num = +num.toString().slice(0, -1);
-    }
+    num = num.slice(0, -1);
     lastButton = getLastButton();
   } else if (lastButton === "operator") {
-    lastButton = "digit";
     displayEquation.textContent = displayEquation.textContent.slice(0, -4);
     operator = "";
-  }
-  else if (lastButton === "decimal") {
-    if (displayEquation.textContent.slice(-1) === ".") {
-      decimalFlag = false;
-    }
+    lastButton = getLastButton();    
+  } else if (lastButton === "decimal") {
     displayEquation.textContent = displayEquation.textContent.slice(0, -1);
+    num = num.slice(0, -1);
+    decimalFlag = false;
     lastButton = getLastButton();
-  }
-  if (zeroesAfterDecimal !=="") {
-    zeroesAfterDecimal = zeroesAfterDecimal.slice(0, -1);
   }
 });
 
@@ -210,11 +184,22 @@ function operate(x, y, operator) {
   return operator(x, y);
 }
 
-function clearHelper() {
+function partialClear() {
   operator = "";
-  num = 0;
+  num = "";
   displayEquation.textContent = "";
   operatorInEquation = false;
-  oldNum = 0;
+  oldNum = "";
   decimalFlag = false;
+}
+
+function fullClear() {
+  operator = "";
+  num = "";
+  displayEquation.textContent = "";
+  operatorInEquation = false;
+  oldNum = "";
+  decimalFlag = false;
+  startFlag = true;
+  currentValue = 0;
 }
