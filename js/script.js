@@ -8,6 +8,8 @@ let lastButton = "";
 let operatorInEquation = false;
 let displayAnswer = document.querySelector("#display-answer");
 let displayEquation = document.querySelector("#display-equation");
+let decimalFlag = false;
+let zeroesAfterDecimal = "";
 
 let digits = document.querySelectorAll(".digit");
 digits.forEach((button) => {
@@ -18,21 +20,34 @@ digits.forEach((button) => {
       startFlag = true;
       currentValue = 0;
     }
-    if (num == 0) {
+    if (button.id !== "0" && lastButton === "decimal") {
+      num = +(num.toString() + "." + zeroesAfterDecimal + button.id);
+      zeroesAfterDecimal = ""
+    } 
+    else if (num == 0) {
       // If the first digit is zero, do nothing.
-      if (button.id !== "0") {
+      if (button.id !== "0" && lastButton !== "decimal") {
         num = button.id;
-      } else {
+      } else if (button.id === "0" && lastButton === "decimal") {
+        
+      }
+      
+      else {
         return;
       }
-    } else {
+    } 
+    else if (lastButton !== "decimal"){
       num += button.id;
     }
 
-    if (lastButton === "digit") {
+    if (lastButton === "digit" || lastButton === "decimal") {
       displayEquation.textContent += `${button.id}`;
     } else {
       displayEquation.textContent += ` ${num}`;
+    }
+    if (lastButton === "decimal" && button.id === "0") {
+      zeroesAfterDecimal = zeroesAfterDecimal + "0";
+      return
     }
     lastButton = "digit";
   });
@@ -59,6 +74,9 @@ operators.forEach((button) => {
     if (operatorInEquation === true && lastButton !== "operator") {
       return;
     }
+    if (lastButton === "decimal") {
+      displayEquation.textContent += `0 ${operatorSymbol} `;
+    }
     if (lastButton === "digit" || lastButton === "equals") {
       displayEquation.textContent += ` ${operatorSymbol} `;
     } else if (lastButton === "operator") {
@@ -68,6 +86,7 @@ operators.forEach((button) => {
     operator = button.id;
     lastButton = "operator";
     operatorInEquation = true;
+    decimalFlag = false;
   });
 });
 
@@ -118,17 +137,44 @@ sign.addEventListener("click", () => {
   displayEquation.textContent = splitEquation.join(" ");
 });
 
+let decimal = document.querySelector("#decimal");
+decimal.addEventListener("click", () => {
+  if (lastButton === "equals") {
+    clearHelper();
+    startFlag = true;
+    currentValue = 0;
+  }
+  if (decimalFlag === true) {
+    return;
+  }
+  displayEquation.textContent += "."
+  decimalFlag = true;
+  lastButton = "decimal"
+})
+
 let del = document.querySelector("#delete");
 del.addEventListener("click", () => {
   let x = displayEquation.textContent;
   if (lastButton === "digit") {
     displayEquation.textContent = displayEquation.textContent.slice(0, -1);
-    num = +num.toString().slice(0, -1);
+    if (zeroesAfterDecimal === "") {
+          num = +num.toString().slice(0, -1);
+    }
     lastButton = getLastButton();
   } else if (lastButton === "operator") {
     lastButton = "digit";
     displayEquation.textContent = displayEquation.textContent.slice(0, -4);
     operator = "";
+  }
+  else if (lastButton === "decimal") {
+    if (displayEquation.textContent.slice(-1) === ".") {
+      decimalFlag = false;
+    }
+    displayEquation.textContent = displayEquation.textContent.slice(0, -1);
+    lastButton = getLastButton();
+  }
+  if (zeroesAfterDecimal !=="") {
+    zeroesAfterDecimal = zeroesAfterDecimal.slice(0, -1);
   }
 });
 
@@ -137,6 +183,8 @@ function getLastButton() {
     return "";
   } else if (displayEquation.textContent.slice(-1) === " ") {
     return "operator";
+  } else if (displayEquation.textContent.slice(-1) === ".") {
+    return "decimal";
   } else {
     return "digit";
   }
@@ -168,4 +216,5 @@ function clearHelper() {
   displayEquation.textContent = "";
   operatorInEquation = false;
   oldNum = 0;
+  decimalFlag = false;
 }
