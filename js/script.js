@@ -25,6 +25,7 @@ digits.forEach((button) => {
 		if (button.id === "0" && num === "") {
 			return;
 		}
+		// Check for and fix edge case that can result from using +/- and DEL buttons.
 		if (num === "0" || num === "-0") {
 			num = "";
 			displayEquation.textContent = "";
@@ -42,16 +43,13 @@ operators.forEach((button) => {
 		if (!displayEquation.textContent && startFlag === true) {
 			return;
 		}
-		// Prevent adding a second operator.
-		if (operatorInEquation === true && lastButton !== "operator") {
-			return;
-		}
+
 		// Show previously calculated value when continuing the calculation.
 		if (!displayEquation.textContent && startFlag === false) {
 			displayEquation.textContent = currentValue;
 		}
 		// Reset and save current value of num when an operator is chosen for the first time.
-		if (!operatorInEquation) {
+		if (!operatorInEquation && startFlag === true) {
 			oldNum = num;
 			num = "";
 		}
@@ -60,7 +58,18 @@ operators.forEach((button) => {
 		// Add trailing zero to decimal.
 		if (lastButton === "decimal") {
 			displayEquation.textContent += `0 ${operatorSymbol} `;
-		} else if (lastButton === "digit" || lastButton === "equals") {
+		} 
+		if (operatorInEquation === true && getLastButton() === "digit") {
+			currentValue = window[operator](+oldNum, +num);
+			startFlag = false;
+			displayAnswer.textContent = currentValue;
+			lastButton = "equals";
+			displayEquation.textContent = `${currentValue} ${operatorSymbol} `;
+			oldNum = currentValue.toString();
+			num = ""
+
+		}
+		else if (lastButton === "digit" || lastButton === "equals") {
 			displayEquation.textContent += ` ${operatorSymbol} `;
 		}
 		// Replace last entered operator.
@@ -90,10 +99,12 @@ equalsButton.addEventListener("click", () => {
 	} else {
 		currentValue = window[operator](+currentValue, +num);
 	}
+	
 	startFlag = false;
 	displayAnswer.textContent = currentValue;
 	lastButton = "equals";
 	partialClear();
+	oldNum = currentValue;
 });
 
 let clear = document.querySelector("#clear");
@@ -105,7 +116,7 @@ clear.addEventListener("click", () => {
 
 let sign = document.querySelector("#sign");
 sign.addEventListener("click", () => {
-	if (num === ".") {
+	if (num === "." || getLastButton() === "operator") {
 		return;
 	}
 	num = (+num * -1).toString();
@@ -114,7 +125,7 @@ sign.addEventListener("click", () => {
 	if (lastValue === 0) {
 		if (currentValue === 0) {
 			return;
-		} else {
+		} else if (displayEquation.textContent === "") {
 			currentValue *= -1;
 			displayAnswer.textContent = currentValue;
 			return;

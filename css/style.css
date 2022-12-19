@@ -10,25 +10,20 @@
     display: flex;
 }
 
-.buttons-operators {
-    display: flex;
-    flex-direction: column;
-}
-
 .btn {
     height: 70px;
     width: 90px;
     margin: 2px;
-    font-size: 28px;
+    font-size: 30px;
 }
 
 body{
-    background-color: #838383;    
+    background-color: #8e8e8e;    
 }
 
 #display-answer {
     color: #f8f9fa;
-    font-size: 32px;
+    font-size: 36px;
     margin: 5px 5px 0 auto;
 }
 
@@ -55,7 +50,10 @@ body{
 #buttons {
     display: flex;
     margin: 5px;
-    flex: none;
+}
+
+#equals {
+    flex: auto;
 }
 
 .flex-container {
@@ -66,24 +64,24 @@ body{
 .column-flex-container {
     display: flex;
     flex-direction: column;
-    margin: 10px;
     align-items: center;
 }
 
 #outer-container {
-    margin-left: 30px;
+    margin: 40px 50px 50px 50px;
 }
 
 h1 {
-    font-size: 40px;
+    font-size: 44px;
     margin-bottom: 0px;
 }
 
 #the-odin-project {
     margin-bottom: 10px;
+    font-size: 18px;
 }
 
-a {
+a{
     color: white;
     text-decoration: none;
 }
@@ -94,5 +92,5 @@ a:hover {
 
 #author {
     margin-top: -10px;
-    font-size: 24px;
+    font-size: 28px;
 }
