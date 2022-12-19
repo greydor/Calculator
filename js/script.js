@@ -232,12 +232,7 @@ function partialClear() {
 }
 
 function fullClear() {
-	operator = "";
-	num = "";
-	displayEquation.textContent = "";
-	operatorInEquation = false;
-	oldNum = "";
-	decimalFlag = false;
+	partialClear();
 	startFlag = true;
 	currentValue = 0;
 }
