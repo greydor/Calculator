@@ -6,7 +6,6 @@ let num = "";
 let oldNum = "";
 let operator = "";
 let startFlag = true;
-let equation = "";
 let lastButton = "";
 let operatorInEquation = false;
 let decimalFlag = false;
@@ -43,7 +42,6 @@ operators.forEach((button) => {
 		if (!displayEquation.textContent && startFlag === true) {
 			return;
 		}
-
 		// Show previously calculated value when continuing the calculation.
 		if (!displayEquation.textContent && startFlag === false) {
 			displayEquation.textContent = currentValue;
@@ -58,18 +56,22 @@ operators.forEach((button) => {
 		// Add trailing zero to decimal.
 		if (lastButton === "decimal") {
 			displayEquation.textContent += `0 ${operatorSymbol} `;
-		} 
+		}
+
+		// Evaluate current equation and chain new operator.
 		if (operatorInEquation === true && getLastButton() === "digit") {
+			if (operator === "") {
+				operator = button.id;
+			}
 			currentValue = window[operator](+oldNum, +num);
+			currentValue = Math.round(currentValue * 10000000) / 10000000;
 			startFlag = false;
 			displayAnswer.textContent = currentValue;
 			lastButton = "equals";
 			displayEquation.textContent = `${currentValue} ${operatorSymbol} `;
 			oldNum = currentValue.toString();
-			num = ""
-
-		}
-		else if (lastButton === "digit" || lastButton === "equals") {
+			num = "";
+		} else if (lastButton === "digit" || lastButton === "equals") {
 			displayEquation.textContent += ` ${operatorSymbol} `;
 		}
 		// Replace last entered operator.
@@ -77,16 +79,16 @@ operators.forEach((button) => {
 			displayEquation.textContent = displayEquation.textContent.slice(0, -2);
 			displayEquation.textContent += ` ${operatorSymbol} `;
 		}
+		lastButton = "operator";
 		operator = button.id;
 		operatorInEquation = true;
-		lastButton = "operator";
 		decimalFlag = false;
 	});
 });
 
 let equalsButton = document.querySelector("#equals");
 equalsButton.addEventListener("click", () => {
-	if (!operatorInEquation) {
+	if (!operatorInEquation || num === "") {
 		return;
 	}
 	if (operator === "divide" && num === "0") {
@@ -99,7 +101,7 @@ equalsButton.addEventListener("click", () => {
 	} else {
 		currentValue = window[operator](+currentValue, +num);
 	}
-	
+	currentValue = Math.round(currentValue * 10000000) / 10000000;
 	startFlag = false;
 	displayAnswer.textContent = currentValue;
 	lastButton = "equals";
@@ -120,9 +122,11 @@ sign.addEventListener("click", () => {
 		return;
 	}
 	num = (+num * -1).toString();
+	// Get last expression in equation.
 	let splitEquation = displayEquation.textContent.split(" ");
 	let lastValue = +splitEquation.pop();
 	if (lastValue === 0) {
+		// Do not allow negative zero.
 		if (currentValue === 0) {
 			return;
 		} else if (displayEquation.textContent === "") {
@@ -168,6 +172,7 @@ del.addEventListener("click", () => {
 		num = num.slice(0, -1);
 	}
 	lastButton = getLastButton();
+	// This program is not designed to handle negative zero so a lone "-" sign is not valid.
 	if (lastButton === "sign") {
 		displayEquation.textContent = displayEquation.textContent.slice(0, -1);
 		num = num.slice(0, -1);
