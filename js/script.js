@@ -11,7 +11,6 @@ let lastButton = "";
 let operatorInEquation = false;
 let decimalFlag = false;
 
-
 let displayAnswer = document.querySelector("#display-answer");
 let displayEquation = document.querySelector("#display-equation");
 
@@ -26,10 +25,10 @@ digits.forEach((button) => {
 		if (button.id === "0" && num === "") {
 			return;
 		}
-    if (num === "0" || num === "-0") {
-      num = "";
-      displayEquation.textContent = "";
-    }
+		if (num === "0" || num === "-0") {
+			num = "";
+			displayEquation.textContent = "";
+		}
 		num += button.id;
 		displayEquation.textContent += button.id;
 		lastButton = "digit";
@@ -107,9 +106,9 @@ clear.addEventListener("click", () => {
 let sign = document.querySelector("#sign");
 sign.addEventListener("click", () => {
 	if (num === ".") {
-    return
-  }
-  num = (+num * -1).toString();
+		return;
+	}
+	num = (+num * -1).toString();
 	let splitEquation = displayEquation.textContent.split(" ");
 	let lastValue = +splitEquation.pop();
 	if (lastValue === 0) {
@@ -153,17 +152,16 @@ del.addEventListener("click", () => {
 		displayEquation.textContent = displayEquation.textContent.slice(0, -1);
 		num = num.slice(0, -1);
 		decimalFlag = false;
+	} else if (lastButton === "sign") {
+		displayEquation.textContent = displayEquation.textContent.slice(0, -1);
+		num = num.slice(0, -1);
 	}
-  else if (lastButton === "sign") {
-    displayEquation.textContent = displayEquation.textContent.slice(0, -1);
-    num = num.slice(0, -1);
-  }
-  lastButton = getLastButton();
-  if (lastButton === "sign") {
-    displayEquation.textContent = displayEquation.textContent.slice(0, -1);
-    num = num.slice(0, -1);
-    lastButton = getLastButton();    
-  }
+	lastButton = getLastButton();
+	if (lastButton === "sign") {
+		displayEquation.textContent = displayEquation.textContent.slice(0, -1);
+		num = num.slice(0, -1);
+		lastButton = getLastButton();
+	}
 });
 
 function getLastButton() {
