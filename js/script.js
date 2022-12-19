@@ -42,6 +42,10 @@ operators.forEach((button) => {
 		if (!displayEquation.textContent && startFlag === true) {
 			return;
 		}
+		// Do nothing if num is not a valid number.
+		if (num.slice(-1) === "." || num.slice(-1) === "-") {
+			return;
+		}
 		// Show previously calculated value when continuing the calculation.
 		if (!displayEquation.textContent && startFlag === false) {
 			displayEquation.textContent = currentValue;
@@ -88,6 +92,10 @@ operators.forEach((button) => {
 
 let equalsButton = document.querySelector("#equals");
 equalsButton.addEventListener("click", () => {
+	// Do nothing if num is not a valid number.
+	if (num.slice(-1) === "." || num.slice(-1) === "-") {
+		return;
+	}
 	if (!operatorInEquation || num === "") {
 		return;
 	}
@@ -161,7 +169,7 @@ del.addEventListener("click", () => {
 		displayEquation.textContent = displayEquation.textContent.slice(0, -1);
 		num = num.slice(0, -1);
 	} else if (lastButton === "operator") {
-		displayEquation.textContent = displayEquation.textContent.slice(0, -4);
+		displayEquation.textContent = displayEquation.textContent.slice(0, -3);
 		operator = "";
 	} else if (lastButton === "decimal") {
 		displayEquation.textContent = displayEquation.textContent.slice(0, -1);
