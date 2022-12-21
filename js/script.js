@@ -21,14 +21,19 @@ digits.forEach((button) => {
 			fullClear();
 		}
 		// If the first digit is zero, do nothing.
-		if (button.id === "0" && num === "") {
+		if (button.id === "0" && num === "" && oldNum === "") {
 			return;
 		}
-		// Check for and fix edge case that can result from using +/- and DEL buttons.
-		if (num === "0" || num === "-0") {
+		// Check for and fix edge cases with zero.
+		if (num === "0") {
 			num = "";
-			displayEquation.textContent = "";
+			displayEquation.textContent = displayEquation.textContent.slice(0,-1);
 		}
+		else if (num === "-0") {
+			num = "";
+			displayEquation.textContent = displayEquation.textContent.slice(0,-2);
+		}
+
 		num += button.id;
 		displayEquation.textContent += button.id;
 		lastButton = "digit";
@@ -58,7 +63,7 @@ operators.forEach((button) => {
 
 		let operatorSymbol = button.textContent.trim();
 		// Add trailing zero to decimal.
-		if (lastButton === "decimal") {
+		if (getLastButton() === "decimal") {
 			displayEquation.textContent += `0 ${operatorSymbol} `;
 		}
 
@@ -75,7 +80,7 @@ operators.forEach((button) => {
 			displayEquation.textContent = `${currentValue} ${operatorSymbol} `;
 			oldNum = currentValue.toString();
 			num = "";
-		} else if (lastButton === "digit" || lastButton === "equals") {
+		} else if (getLastButton() === "digit" || getLastButton() === "equals") {
 			displayEquation.textContent += ` ${operatorSymbol} `;
 		}
 		// Replace last entered operator.
@@ -197,6 +202,8 @@ function getLastButton() {
 		return "decimal";
 	} else if (displayEquation.textContent.slice(-1) === "-") {
 		return "sign";
+	} else if (displayEquation.textContent.slice(-1) === "=") {
+		return "equals";
 	} else {
 		return "digit";
 	}
